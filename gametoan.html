@@ -1,0 +1,348 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kiểm tra Toán lớp 4</title>
+<style>
+*{box-sizing:border-box}
+body{
+  font-family:Arial,sans-serif;
+  background:#edf4ff;
+  margin:0;padding:20px;color:#24334a
+}
+.container{
+  max-width:850px;margin:auto;background:white;
+  padding:25px;border-radius:18px;
+  box-shadow:0 5px 20px #0001
+}
+h1{text-align:center;color:#1769aa;font-size:27px}
+.subtitle{text-align:center;color:#66788a}
+.info{
+  display:flex;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;margin:20px 0
+}
+.info span{
+  background:#e5f2ff;padding:10px 15px;
+  border-radius:9px;font-weight:bold
+}
+.progress{
+  height:10px;background:#e5e7eb;
+  border-radius:10px;overflow:hidden
+}
+#bar{height:100%;width:0;background:#2196d2}
+.question{
+  margin-top:25px;padding:20px;
+  background:#f7faff;border-radius:12px
+}
+#qtitle{font-size:19px;font-weight:bold;line-height:1.5}
+.option{
+  display:block;width:100%;text-align:left;
+  padding:15px;margin:12px 0;
+  border:2px solid #dce6f1;border-radius:10px;
+  background:white;font-size:17px;cursor:pointer
+}
+.option:hover{background:#eaf5ff}
+.option.selected{border-color:#1686d9;background:#dff1ff}
+.option:disabled{cursor:default}
+.controls{
+  display:flex;justify-content:space-between;
+  gap:10px;margin-top:22px;flex-wrap:wrap
+}
+button{
+  padding:12px 20px;border:0;border-radius:9px;
+  cursor:pointer;font-size:16px;font-weight:bold
+}
+.prev{background:#dce5ef;color:#26384d}
+.next{background:#1686d9;color:white}
+.submit{background:#16a36b;color:white}
+button:disabled{opacity:.4;cursor:not-allowed}
+#result{
+  display:none;margin-top:25px;padding:20px;
+  background:#effaf3;border-radius:12px
+}
+.correct{color:#14834d;font-weight:bold}
+.wrong{color:#d23c3c;font-weight:bold}
+.review{
+  padding:12px;margin:10px 0;
+  background:white;border-radius:8px
+}
+#numbers{
+ display:flex;flex-wrap:wrap;gap:7px;margin-top:20px
+}
+.num{
+ width:36px;height:36px;padding:0;
+ background:#e6edf5;color:#333
+}
+.num.done{background:#bce9d0}
+.num.active{background:#1686d9;color:white}
+@media(max-width:600px){
+ .container{padding:15px}
+ h1{font-size:22px}
+ #qtitle{font-size:17px}
+ .option{font-size:16px}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1> BÀI KIỂM TRA TOÁN LỚP 4 </h1>
+<p class="subtitle">Bài kiểm tra trắc nghiệm trực tuyến – 30 câu</p>
+
+<div class="info">
+ <span>📚 Môn: Toán 4</span>
+ <span>📝 Số câu: 30</span>
+ <span>⏰ Thời gian: <b id="timer">30:00</b></span>
+</div>
+
+<div class="progress"><div id="bar"></div></div>
+
+<div class="question">
+ <p id="counter"></p>
+ <div id="qtitle"></div>
+ <div id="options"></div>
+</div>
+
+<div class="controls">
+ <button class="prev" id="prev" onclick="move(-1)">❮ Câu trước</button>
+ <button class="next" id="next" onclick="move(1)">Câu tiếp ❯</button>
+ <button class="submit" id="submit" onclick="finish()">NỘP BÀI</button>
+</div>
+
+<div id="numbers"></div>
+
+<div id="result">
+ <h2>🎉 KẾT QUẢ BÀI KIỂM TRA</h2>
+ <h1 id="score"></h1>
+ <p id="summary"></p>
+ <h3>ĐÁP ÁN VÀ NHẬN XÉT</h3>
+ <div id="review"></div>
+ <button class="next" onclick="location.reload()">Làm bài mới</button>
+</div>
+</div>
+
+<script>
+const questions = [
+{
+q:"1. Số 4 305 218 được đọc là:",
+a:["Bốn triệu ba trăm linh năm nghìn hai trăm mười tám",
+"Bốn triệu ba trăm năm mươi nghìn hai trăm mười tám",
+"Bốn triệu ba trăm linh năm nghìn hai trăm tám mươi",
+"Bốn triệu ba trăm năm nghìn hai trăm mười tám"],c:0
+},
+{
+q:"2. Sáu triệu không trăm hai mươi nghìn bốn trăm linh năm viết là:",
+a:["6 200 405","6 020 405","6 020 450","6 200 045"],c:1
+},
+{
+q:"3. Chữ số 7 trong số 8 725 416 có giá trị là:",
+a:["7 000","70 000","700 000","7 000 000"],c:2
+},
+{
+q:"4. Điền dấu thích hợp: 6 345 210 ... 6 354 120",
+a:[">","<","=","Không so sánh được"],c:1
+},
+{
+q:"5. Số lớn nhất trong các số sau là:",
+a:["7 890 123","7 809 321","7 980 321","7 908 231"],c:2
+},
+{
+q:"6. Làm tròn số 3 462 815 đến hàng trăm nghìn:",
+a:["3 400 000","3 500 000","3 460 000","3 000 000"],c:1
+},
+{
+q:"7. Làm tròn số 8 249 631 đến hàng trăm nghìn:",
+a:["8 200 000","8 300 000","8 250 000","8 000 000"],c:0
+},
+{
+q:"8. Góc có số đo 45° là:",
+a:["Góc tù","Góc bẹt","Góc nhọn","Góc vuông"],c:2
+},
+{
+q:"9. Góc có số đo 135° là:",
+a:["Góc nhọn","Góc tù","Góc vuông","Góc bẹt"],c:1
+},
+{
+q:"10. Góc có số đo 180° là:",
+a:["Góc nhọn","Góc tù","Góc vuông","Góc bẹt"],c:3
+},
+{
+q:"11. Với a = 125, giá trị của biểu thức a + 375 là:",
+a:["400","450","550","500"],c:3
+},
+{
+q:"12. Với b = 24, giá trị của biểu thức 120 : b + 35 là:",
+a:["40","38","45","60"],c:0
+},
+{
+q:"13. 3 tấn bằng bao nhiêu tạ?",
+a:["3 tạ","30 tạ","300 tạ","3000 tạ"],c:1
+},
+{
+q:"14. 45 yến bằng bao nhiêu tạ?",
+a:["450 tạ","4,5 tạ","45 tạ","4500 tạ"],c:1
+},
+{
+q:"15. 2 m² 35 dm² bằng bao nhiêu dm²?",
+a:["235 dm²","55 dm²","2035 dm²","2350 dm²"],c:0
+},
+{
+q:"16. 5 dm² bằng bao nhiêu cm²?",
+a:["50 cm²","5000 cm²","500 cm²","50000 cm²"],c:2
+},
+{
+q:"17. 4 cm² bằng bao nhiêu mm²?",
+a:["40 mm²","400 mm²","4000 mm²","40000 mm²"],c:1
+},
+{
+q:"18. 350 dm² bằng bao nhiêu m² và dm²?",
+a:["3 m² 50 dm²","35 m² 0 dm²","3 m² 5 dm²","30 m² 50 dm²"],c:0
+},
+{
+q:"19. 725 cm² bằng bao nhiêu dm² và cm²?",
+a:["72 dm² 5 cm²","7 dm² 25 cm²","7 dm² 2 cm²","70 dm² 25 cm²"],c:1
+},
+{
+q:"20. 680 mm² bằng bao nhiêu cm² và mm²?",
+a:["68 cm² 0 mm²","6 cm² 8 mm²","6 cm² 80 mm²","60 cm² 80 mm²"],c:2
+},
+{
+q:"21. 4 tạ 5 yến bằng bao nhiêu yến?",
+a:["45 yến","405 yến","450 yến","9 yến"],c:0
+},
+{
+q:"22. Một cửa hàng có 125 kg gạo. Buổi sáng bán 35 kg, buổi chiều bán gấp đôi buổi sáng. Hỏi còn lại bao nhiêu kg gạo?",
+a:["20 kg","55 kg","70 kg","90 kg"],c:0
+},
+{
+q:"23. Thư viện có 8 giá sách, mỗi giá có 125 quyển. Nhập thêm 240 quyển rồi tặng 175 quyển. Còn lại bao nhiêu quyển?",
+a:["1000 quyển","1240 quyển","1065 quyển","1415 quyển"],c:2
+},
+{
+q:"24. Ngày thứ nhất sửa được 245 m đường. Ngày thứ hai nhiều hơn 85 m. Ngày thứ ba gấp đôi ngày thứ hai. Hỏi cả ba ngày sửa được bao nhiêu mét?",
+a:["990 m","1235 m","1150 m","1320 m"],c:1
+},
+{
+q:"25. Một cửa hàng có 350 quyển vở. Buổi sáng bán 85 quyển, buổi chiều bán nhiều hơn buổi sáng 25 quyển. Hỏi cửa hàng còn bao nhiêu quyển vở?",
+a:["155 quyển","180 quyển","205 quyển","240 quyển"],c:1
+},
+{
+q:"26. Một trang trại có 125 con gà. Số vịt nhiều hơn số gà 35 con. Số ngan bằng một nửa số vịt. Hỏi trang trại có tất cả bao nhiêu con?",
+a:["320 con","365 con","285 con","240 con"],c:0
+},
+{
+q:"27. Một đội trồng cây có 4 tổ, mỗi tổ trồng 125 cây. Sau đó trồng thêm 85 cây và chuyển đi 65 cây. Đội còn bao nhiêu cây?",
+a:["500 cây","585 cây","520 cây","650 cây"],c:2
+},
+{
+q:"28. Một cửa hàng nhập 6 thùng bánh, mỗi thùng có 48 hộp. Cửa hàng bán 125 hộp rồi nhập thêm 80 hộp. Hiện có bao nhiêu hộp bánh?",
+a:["243 hộp","288 hộp","163 hộp","205 hộp"],c:0
+},
+{
+q:"29. Một trường có 5 lớp 4, mỗi lớp có 35 học sinh. Có 18 học sinh chuyển trường và 12 học sinh chuyển đến. Trường hiện có bao nhiêu học sinh lớp 4?",
+a:["175 học sinh","169 học sinh","157 học sinh","205 học sinh"],c:1
+},
+{
+q:"30. Một cửa hàng có 450 kg đường. Ngày thứ nhất bán 125 kg, ngày thứ hai bán ít hơn ngày thứ nhất 35 kg. Ngày thứ ba bán 100 kg. Hỏi còn lại bao nhiêu kg đường?",
+a:["200 kg","235 kg","225 kg","260 kg"],c:2
+}
+];
+
+let current=0;
+let answers=Array(questions.length).fill(-1);
+let time=1800;
+let ended=false;
+
+function show(){
+ const q=questions[current];
+ document.getElementById("counter").innerText=
+ "Câu hỏi "+(current+1)+" / "+questions.length;
+ document.getElementById("qtitle").innerText=q.q;
+ document.getElementById("options").innerHTML="";
+ q.a.forEach((v,i)=>{
+  const b=document.createElement("button");
+  b.className="option"+(answers[current]===i?" selected":"");
+  b.innerText=String.fromCharCode(65+i)+". "+v;
+  b.onclick=()=>select(i);
+  document.getElementById("options").appendChild(b);
+ });
+ document.getElementById("prev").disabled=current===0;
+ document.getElementById("next").disabled=current===29;
+ document.getElementById("bar").style.width=
+ ((current+1)/30*100)+"%";
+ renderNumbers();
+}
+function select(i){
+ if(ended)return;
+ answers[current]=i;
+ show();
+}
+function move(n){
+ current=Math.max(0,Math.min(29,current+n));
+ show();
+}
+function renderNumbers(){
+ document.getElementById("numbers").innerHTML=
+ questions.map((q,i)=>
+ `<button class="num ${answers[i]>=0?'done':''} ${i===current?'active':''}"
+ onclick="jump(${i})">${i+1}</button>`).join("");
+}
+function jump(i){current=i;show()}
+
+function finish(){
+ if(ended)return;
+ let unanswered=answers.filter(x=>x===-1).length;
+ if(unanswered>0 &&
+ !confirm("Còn "+unanswered+" câu chưa trả lời. Cô/bạn vẫn muốn nộp bài?"))
+ return;
+ ended=true;
+ clearInterval(clock);
+ let correct=0;
+ questions.forEach((q,i)=>{
+  if(answers[i]===q.c)correct++;
+ });
+ let score=correct/30*10;
+ document.getElementById("score").innerText=
+ score.toFixed(2).replace(".",",")+" / 10 điểm";
+ document.getElementById("summary").innerText=
+ "Số câu đúng: "+correct+"/30 | Số câu sai hoặc bỏ trống: "+
+ (30-correct)+"/30";
+ let html="";
+ questions.forEach((q,i)=>{
+  let ok=answers[i]===q.c;
+  html+=`<div class="review">
+  <b>${q.q}</b><br>
+  Bạn chọn: ${answers[i]<0?"Chưa trả lời":
+  String.fromCharCode(65+answers[i])+". "+q.a[answers[i]]}
+  <br><span class="${ok?'correct':'wrong'}">
+  ${ok?'✓ Chính xác':'✗ Chưa chính xác'}
+  </span><br>
+  Đáp án đúng: <b>${String.fromCharCode(65+q.c)}. ${q.a[q.c]}</b>
+  </div>`;
+ });
+ document.getElementById("review").innerHTML=html;
+ document.getElementById("result").style.display="block";
+ document.querySelector(".question").style.display="none";
+ document.querySelector(".controls").style.display="none";
+ document.getElementById("numbers").style.display="none";
+ document.getElementById("result").scrollIntoView();
+}
+function tick(){
+ if(ended)return;
+ time--;
+ let m=Math.floor(time/60);
+ let s=time%60;
+ document.getElementById("timer").innerText=
+ String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+ if(time<=0){
+  alert("Đã hết thời gian! Bài kiểm tra sẽ được tự động nộp.");
+  finish();
+ }
+}
+const clock=setInterval(tick,1000);
+show();
+</script>
+</body>
+</html>
